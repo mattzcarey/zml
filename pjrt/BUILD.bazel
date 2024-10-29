@@ -11,9 +11,9 @@ cc_binary(
     name = "xspace_to_json_cc",
     srcs = ["xspace_to_json.cc"],
     deps = [
-        "@xla//tsl:post_process_single_host_xplane",
-        "@xla//tsl:trace_events_to_json",
-        "@xla//tsl:xplane_to_trace_events",
+        "@xla//xla/tsl/profiler/convert:post_process_single_host_xplane",
+        "@xla//xla/tsl/profiler/convert:trace_events_to_json",
+        "@xla//xla/tsl/profiler/convert:xplane_to_trace_events",
     ],
 )
 
@@ -51,8 +51,6 @@ zig_proto_library(
     import_name = "//tsl:trace_events_proto",
     deps = ["@tsl//tsl/profiler/protobuf:trace_events_proto"],
 )
-
-
 zig_cc_binary(
     name = "xspace_to_json",
     srcs = glob(["utils/*.zig"]) +  ["xplane_to_trace_events.zig"],
