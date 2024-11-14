@@ -148,7 +148,11 @@ pub const Buffer = struct {
     /// Also note that it might not work on all platforms,
     /// could lead to crashes and is considerably slower.
     pub fn asViewOf(platform: Platform, buf: HostBuffer) !Buffer {
-        const minor_to_major: [Shape.MAX_RANK]i64 = comptime blk: {
+        return fromDeviceHandle(platform, buf.shape(), null, @constCast(@ptrCast(buf.data.ptr)));
+    }
+
+    pub fn fromDeviceHandle(platform: Platform, shape_: Shape, stream: ?isize, device_data: *anyopaque) !Buffer {
+        const minor_to_major: [Shape.MAX_RANK]i64 = blk: {
             var res: [Shape.MAX_RANK]i64 = undefined;
             for (0..Shape.MAX_RANK) |i| {
                 res[i] = @intCast(Shape.MAX_RANK - i - 1);
@@ -156,28 +160,26 @@ pub const Buffer = struct {
             break :blk res;
         };
 
+        const device_bytes: [*]u8 = @ptrCast(device_data);
         const pjrt_buffer = try platform.pjrt_client.createViewOfDeviceBuffer(platform.pjrt_api, .{
-            .data = buf.data,
-            .element_type = bufferTypeFromDtype(buf.shape().dtype()),
-            .dims = buf.shape().dims(),
-            // TODO: split in shards
+            .data = device_bytes[0..shape_.byteSize()],
+            .element_type = bufferTypeFromDtype(shape_.dtype()),
+            .dims = shape_.dims(),
+            // TODO: expose sharding in the API
             .device = platform.getDevices()[0],
             .layout = .{
                 .Tiled = .{
-                    .minor_to_major = minor_to_major[Shape.MAX_RANK - buf.shape().rank() ..],
+                    .minor_to_major = minor_to_major[Shape.MAX_RANK - shape_.rank() ..],
                     .tile_dims = &.{},
                     .tile_dims_sizes = &.{},
                 },
             },
+            .stream = stream,
         });
 
         var shards: Shards = .{};
         shards.appendAssumeCapacity(pjrt_buffer);
-        return .{
-            ._api = platform.pjrt_api,
-            ._shape = buf.shape(),
-            ._shards = shards,
-        };
+        return .{ ._api = platform.pjrt_api, ._shape = shape_, ._shards = shards };
     }
 
     /// Fetches the content of the given buffer into a stack variable of the given type.

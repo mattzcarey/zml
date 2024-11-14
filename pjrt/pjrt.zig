@@ -867,7 +867,7 @@ pub const NamedValue = extern struct {
 /// * a pointer to a platform specific stream handle
 /// * a pointer to an unspecified list of platform specific buffer handle
 /// * a context struct passed as a slice of bytes
-pub const CustomCall = fn (*anyopaque, [*]*anyopaque, [*]const u8, usize) callconv(.C) void;
+pub const CustomCall = fn (isize, [*]*anyopaque, [*]const u8, usize) callconv(.C) void;
 
 pub const CustomCallRegistry = extern struct {
     inner: *const c.PJRT_Gpu_Register_Custom_Call,
