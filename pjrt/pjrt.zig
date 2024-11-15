@@ -345,7 +345,7 @@ pub const Client = opaque {
         device: *const Device,
         on_delete_callback: ?*const fn (device_buffer_ptr: ?*anyopaque, ctx: ?*anyopaque) callconv(.C) void = null,
         on_delete_callback_arg: ?*anyopaque = null,
-        stream: ?isize = null,
+        stream: ?*const anyopaque = null,
     };
 
     pub fn createViewOfDeviceBuffer(self: *const Client, api: *const Api, args: CreateViewOfDeviceBufferArgs) ApiError!*Buffer {
@@ -360,7 +360,7 @@ pub const Client = opaque {
             .device = @ptrCast(@constCast(args.device)),
             .on_delete_callback = args.on_delete_callback,
             .on_delete_callback_arg = args.on_delete_callback_arg,
-            .stream = if (args.stream) |stream| stream else 0,
+            .stream = @bitCast(@as(usize, @intFromPtr(args.stream))),
         });
         return @ptrCast(ret.buffer.?);
     }
@@ -867,7 +867,7 @@ pub const NamedValue = extern struct {
 /// * a pointer to a platform specific stream handle
 /// * a pointer to an unspecified list of platform specific buffer handle
 /// * a context struct passed as a slice of bytes
-pub const CustomCall = fn (isize, [*]*anyopaque, [*]const u8, usize) callconv(.C) void;
+pub const CustomCall = fn (*anyopaque, [*]*anyopaque, [*]const u8, usize) callconv(.C) void;
 
 pub const CustomCallRegistry = extern struct {
     inner: *const c.PJRT_Gpu_Register_Custom_Call,

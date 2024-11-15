@@ -174,7 +174,7 @@ const cuda = struct {
     }
 
     fn hostBufferCallback(
-        stream: isize,
+        stream: *anyopaque,
         buffers: [*]*anyopaque,
         args: [*]const u8,
         args_len: usize,
@@ -182,7 +182,12 @@ const cuda = struct {
         const src: *anyopaque = buffers[0];
         const callback, const ctx = getContext(args, args_len);
 
-        const device_buffer = Buffer.fromDeviceHandle(ctx.platform, ctx.host.shape(), stream, src) catch |err| {
+        // On cuda stream is cuStream ie a pointer to the internal Cuda stream struct.
+        // pjrt.CreateViewOfDeviceBuffer takes a pointer to cuStream.
+        // see: https://github.com/openxla/xla/blob/c5346ef5527edcddf194e6d33bcde082f544e8b1/xla/pjrt/pjrt_stream_executor_client.cc#L1307-L1307
+        // where stream is dereferenced before calling GetStreamFromExternalStream
+        const stream_ptr: *const anyopaque = &@intFromPtr(stream);
+        const device_buffer = Buffer.asViewOfDeviceBuffer(ctx.platform, ctx.host.shape(), stream_ptr, src) catch |err| {
             std.debug.print("[ERR] Failed to retrieve device buffer {} with stream={} : {}\n", .{ err, stream, ctx.host.shape() });
             return;
         };

@@ -147,11 +147,13 @@ pub const Buffer = struct {
     /// Be careful though, as it requires a specific alignment.
     /// Also note that it might not work on all platforms,
     /// could lead to crashes and is considerably slower.
-    pub fn asViewOf(platform: Platform, buf: HostBuffer) !Buffer {
-        return fromDeviceHandle(platform, buf.shape(), null, @constCast(@ptrCast(buf.data.ptr)));
+    pub fn asViewOfHostBuffer(platform: Platform, buf: HostBuffer) !Buffer {
+        return asViewOfDeviceBuffer(platform, buf.shape(), null, @constCast(@ptrCast(buf.data.ptr)));
     }
 
-    pub fn fromDeviceHandle(platform: Platform, shape_: Shape, stream: ?isize, device_data: *anyopaque) !Buffer {
+    /// Creates a Buffer from a pointer into device memory.
+    /// This allows to interface with other libraries producing buffers.
+    pub fn asViewOfDeviceBuffer(platform: Platform, shape_: Shape, stream: ?*const anyopaque, device_data: *anyopaque) !Buffer {
         const minor_to_major: [Shape.MAX_RANK]i64 = blk: {
             var res: [Shape.MAX_RANK]i64 = undefined;
             for (0..Shape.MAX_RANK) |i| {
