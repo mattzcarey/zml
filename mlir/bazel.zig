@@ -1,9 +1,5 @@
 const std = @import("std");
 
-pub const Helper = struct {
-    deps: []Dependency,
-};
-
 pub fn init(b: *std.Build) !void {
     var argv = [_][]const u8{ "sh", "bazel.sh" };
     _ = try std.process.Child.run(.{
@@ -80,5 +76,29 @@ pub fn addIncludeDir(b: *std.Build, translate_c: *std.Build.Step.TranslateC, baz
         var path_buffer: [1028]u8 = undefined;
         const include_dir = try std.fmt.bufPrint(&path_buffer, "../{s}/include", .{std.fs.path.dirname(line).?});
         translate_c.addIncludePath(b.path(include_dir));
+    }
+}
+
+pub fn configTranslateC(b: *std.Build, translate_c: *std.Build.Step.TranslateC, dep: []const u8) !void {
+    const query_res = try std.process.Child.run(.{
+        .argv = &.{ "bazel", "query", "--output=location", "'deps(", dep, ")'" },
+        .allocator = b.allocator,
+    });
+    std.debug.print("query_res.stdout: {s}\n", .{query_res.stdout});
+    var include_dirs: std.StringArrayHashMapUnmanaged(void) = undefined;
+    var line_iter = std.mem.splitScalar(u8, query_res.stdout, '\n');
+    while (line_iter.next()) |line| {
+        if (std.mem.indexOf(u8, line, ":1:1: source file ")) |end| {
+            const hdr_path = line[0..end];
+            std.debug.print("hdr_path: {s}\n", .{hdr_path});
+            if (!std.mem.eql(u8, std.fs.path.extension(hdr_path), ".h")) continue;
+            if (std.fs.path.dirname(hdr_path)) |dirname| {
+                if (std.mem.indexOf(u8, dirname, "/include/")) |pos| {
+                    const include_dir_path = dirname[0 .. pos + "/include".len];
+                    const entry = try include_dirs.getOrPut(b.allocator, include_dir_path);
+                    if (!entry.found_existing) translate_c.addIncludePath(b.path(include_dir_path));
+                }
+            }
+        }
     }
 }

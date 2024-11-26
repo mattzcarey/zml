@@ -61,8 +61,8 @@ pub fn build(b: *std.Build) !void {
     });
 
     // TODO: this returns path, but missing absolute path prefix
-    try bazel.addIncludeDir(b, mlir_c_translated, "//mlir:mlirx");
-    try bazel.addIncludeDir(b, mlirx_translated, "//mlir:mlirx");
+    try bazel.configTranslateC(b, mlir_c_translated, "//mlir:c");
+    try bazel.configTranslateC(b, mlirx_translated, "//mlir:mlirx");
 
     const install_lib = b.addInstallArtifact(lib, .{});
     b.getInstallStep().dependOn(&install_lib.step);
