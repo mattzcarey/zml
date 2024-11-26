@@ -1,5 +1,11 @@
 load("@rules_zig//zig:defs.bzl", "zig_library")
 
+filegroup(
+    name = "zmlxcuda_srcs",
+    srcs = ["zmlxcuda.c"],
+    visibility = ["@libpjrt_cuda//:__subpackages__"],
+)
+
 cc_library(
     name = "empty",
 )

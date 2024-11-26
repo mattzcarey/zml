@@ -97,9 +97,9 @@ native_binary(
     ],
 )
 
-native_binary(
+cc_binary(
     name = "TinyLlama-Stories-15M",
-    src = ":llama",
+    deps = [":llama_lib"],
     args = [
         "--model=$(location @Karpathy-TinyLlama-Stories//:stories15M)",
         "--tokenizer=$(location @Karpathy-TinyLlama-Tokenizer//file)",

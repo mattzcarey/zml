@@ -8,10 +8,18 @@ CUDA_VERSION = "12.6.2"
 CUDNN_VERSION = "9.4.0"
 
 _CC_IMPORT_TPL = """\
+load("@zml//bazel:cc_import.bzl", "cc_import")
+
 cc_import(
     name = "{name}",
     shared_library = "lib/{shared_library}",
     visibility = ["@libpjrt_cuda//:__subpackages__"],
+    add_needed = [
+        "libzmlxcuda.so.0",
+    ],
+    rename_dynamic_symbols = {{
+        "dlopen": "zmlxcuda_dlopen",
+    }},
 )
 """
 
@@ -23,6 +31,8 @@ CUDA_PACKAGES = {
     "libcusparse": _CC_IMPORT_TPL.format(name = "cusparse", shared_library = "libcusparse.so.12"),
     "libnvjitlink": _CC_IMPORT_TPL.format(name = "nvjitlink", shared_library = "libnvJitLink.so.12"),
     "cuda_nvcc": """\
+load("@zml//bazel:cc_import.bzl", "cc_import")
+
 filegroup(
     name = "ptxas",
     srcs = ["bin/ptxas"],
@@ -39,25 +49,53 @@ cc_import(
     name = "nvvm",
     shared_library = "nvvm/lib64/libnvvm.so.4",
     visibility = ["@libpjrt_cuda//:__subpackages__"],
+    add_needed = [
+        "libzmlxcuda.so.0",
+    ],
+    rename_dynamic_symbols = {
+        "dlopen": "zmlxcuda_dlopen",
+    },
 )
 """,
     "cuda_nvrtc": """\
+load("@zml//bazel:cc_import.bzl", "cc_import")
+
 cc_import(
     name = "nvrtc",
     shared_library = "lib/libnvrtc.so.12",
     visibility = ["@libpjrt_cuda//:__subpackages__"],
     deps = [":nvrtc_builtins"],
+    add_needed = [
+        "libzmlxcuda.so.0",
+    ],
+    rename_dynamic_symbols = {
+        "dlopen": "zmlxcuda_dlopen",
+    },
 )
 
 cc_import(
     name = "nvrtc_builtins",
     shared_library = "lib/libnvrtc-builtins.so.12.6",
+    add_needed = [
+        "libzmlxcuda.so.0",
+    ],
+    rename_dynamic_symbols = {
+        "dlopen": "zmlxcuda_dlopen",
+    },
 )
 """,
     "libcublas": """\
+load("@zml//bazel:cc_import.bzl", "cc_import")
+
 cc_import(
     name = "cublasLt",
     shared_library = "lib/libcublasLt.so.12",
+    add_needed = [
+        "libzmlxcuda.so.0",
+    ],
+    rename_dynamic_symbols = {
+        "dlopen": "zmlxcuda_dlopen",
+    },
 )
 
 cc_import(
@@ -65,12 +103,20 @@ cc_import(
     shared_library = "lib/libcublas.so.12",
     visibility = ["@libpjrt_cuda//:__subpackages__"],
     deps = [":cublasLt"],
+    add_needed = [
+        "libzmlxcuda.so.0",
+    ],
+    rename_dynamic_symbols = {
+        "dlopen": "zmlxcuda_dlopen",
+    },
 )
 """,
 }
 
 CUDNN_PACKAGES = {
     "cudnn": """\
+load("@zml//bazel:cc_import.bzl", "cc_import")
+
 cc_import(
     name = "cudnn",
     shared_library = "lib/libcudnn.so.9",
@@ -84,42 +130,90 @@ cc_import(
         ":cudnn_engines_runtime_compiled",
         ":cudnn_heuristic",
     ],
+    add_needed = [
+        "libzmlxcuda.so.0",
+    ],
+    rename_dynamic_symbols = {
+        "dlopen": "zmlxcuda_dlopen",
+    },
 )
 
 cc_import(
     name = "cudnn_adv",
     shared_library = "lib/libcudnn_adv.so.9",
+    add_needed = [
+        "libzmlxcuda.so.0",
+    ],
+    rename_dynamic_symbols = {
+        "dlopen": "zmlxcuda_dlopen",
+    },
 )
 
 cc_import(
     name = "cudnn_ops",
     shared_library = "lib/libcudnn_ops.so.9",
+    add_needed = [
+        "libzmlxcuda.so.0",
+    ],
+    rename_dynamic_symbols = {
+        "dlopen": "zmlxcuda_dlopen",
+    },
 )
 
 cc_import(
     name = "cudnn_cnn",
     shared_library = "lib/libcudnn_cnn.so.9",
     deps = [":cudnn_ops"],
+    add_needed = [
+        "libzmlxcuda.so.0",
+    ],
+    rename_dynamic_symbols = {
+        "dlopen": "zmlxcuda_dlopen",
+    },
 )
 
 cc_import(
     name = "cudnn_graph",
     shared_library = "lib/libcudnn_graph.so.9",
+    add_needed = [
+        "libzmlxcuda.so.0",
+    ],
+    rename_dynamic_symbols = {
+        "dlopen": "zmlxcuda_dlopen",
+    },
 )
 
 cc_import(
     name = "cudnn_engines_precompiled",
     shared_library = "lib/libcudnn_engines_precompiled.so.9",
+    add_needed = [
+        "libzmlxcuda.so.0",
+    ],
+    rename_dynamic_symbols = {
+        "dlopen": "zmlxcuda_dlopen",
+    },
 )
 
 cc_import(
     name = "cudnn_engines_runtime_compiled",
     shared_library = "lib/libcudnn_engines_runtime_compiled.so.9",
+    add_needed = [
+        "libzmlxcuda.so.0",
+    ],
+    rename_dynamic_symbols = {
+        "dlopen": "zmlxcuda_dlopen",
+    },
 )
 
 cc_import(
     name = "cudnn_heuristic",
     shared_library = "lib/libcudnn_heuristic.so.9",
+    add_needed = [
+        "libzmlxcuda.so.0",
+    ],
+    rename_dynamic_symbols = {
+        "dlopen": "zmlxcuda_dlopen",
+    },
 )
 """,
 }
@@ -160,10 +254,18 @@ def _cuda_impl(mctx):
         urls = ["https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/libnccl2_2.22.3-1+cuda12.6_amd64.deb"],
         sha256 = "2f64685bcd503150ab45d00503236a56da58a15eac5fd36508045a74f4e10678",
         build_file_content = """\
+load("@zml//bazel:cc_import.bzl", "cc_import")
+
 cc_import(
     name = "nccl",
     shared_library = "usr/lib/x86_64-linux-gnu/libnccl.so.2",
     visibility = ["@libpjrt_cuda//:__subpackages__"],
+    add_needed = [
+        "libzmlxcuda.so.0",
+    ],
+    rename_dynamic_symbols = {
+        "dlopen": "zmlxcuda_dlopen",
+    },
 )
 """,
     )
@@ -172,9 +274,17 @@ cc_import(
         urls = ["http://archive.ubuntu.com/ubuntu/pool/main/z/zlib/zlib1g_1.3.dfsg-3.1ubuntu2.1_amd64.deb"],
         sha256 = "7074b6a2f6367a10d280c00a1cb02e74277709180bab4f2491a2f355ab2d6c20",
         build_file_content = """\
+load("@zml//bazel:cc_import.bzl", "cc_import")
+
 cc_import(
     name = "zlib",
     shared_library = "usr/lib/x86_64-linux-gnu/libz.so.1",
+    add_needed = [
+        "libzmlxcuda.so.0",
+    ],
+    rename_dynamic_symbols = {
+        "dlopen": "zmlxcuda_dlopen",
+    },
     visibility = ["@libpjrt_cuda//:__subpackages__"],
 )
 """,
