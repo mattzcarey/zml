@@ -1,0 +1,23 @@
+.{
+    .name = "async",
+    .version = "0.0.0",
+    .dependencies = .{
+        .libxev = .{
+            .url = "https://github.com/zml/libxev/archive/a2d9b3154f1e5ed463c9f2fb98a0d739057796ce.tar.gz",
+            .hash = "12208a5d62657ca10a89ade74cf5d21f3df11cd980daabfa53dd8e19f889052d8c7d",
+            .lazy = true,
+        },
+        .zigcoro = .{
+            .url = "https://github.com/cryptodeal/zigcoro/archive/ad7153cc0e065b8e4593af017ce73722cba0f350.tar.gz",
+            .hash = "1220dc3a1fc7f443a8ebd49f34196c764c29b8b51ea848a36cff03b565722d8174f5",
+            .lazy = true,
+        },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "meta.zig",
+        "threaded.zig",
+        "zigcoro.zig",
+    },
+}

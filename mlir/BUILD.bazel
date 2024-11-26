@@ -5,6 +5,7 @@ cc_library(
     name = "mlirx",
     srcs = ["mlirx.cc"],
     hdrs = ["mlirx.h"],
+    visibility = ["//visibility:public"],
     includes = ["."],
     deps = [
         "@llvm-project//mlir:CAPIIR",

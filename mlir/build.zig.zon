@@ -1,0 +1,16 @@
+.{
+    .name = "mlir",
+    .version = "0.0.0",
+    .dependencies = .{},
+    .paths = .{
+        "dialects",
+        "bazel.sh",
+        "BUILD.bazel",
+        "build.zig",
+        "build.zig.zon",
+        "c.h",
+        "mlir.zig",
+        "mlirx.cc",
+        "mlirx.h",
+    },
+}
