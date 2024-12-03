@@ -100,6 +100,8 @@ use_repo(llvm, "llvm-project")
 bazel_dep(name = "stablehlo", version = "20241021.0-1c0b606")
 bazel_dep(name = "xla", version = "20241025.0-4663f04")
 
+bazel_dep(name = "mlx", version = "20241130.0-bb303c4")
+
 tsl = use_extension("@xla//:tsl.bzl", "tsl")
 use_repo(tsl, "tsl")
 

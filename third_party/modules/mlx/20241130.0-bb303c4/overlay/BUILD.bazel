@@ -1,0 +1,62 @@
+load("@build_bazel_rules_apple//apple:resources.bzl", "apple_metal_library")
+
+
+cc_library(
+  name = "mlx",
+  srcs = [
+      "mlx/backend/metal/nojit_kernels.cpp",
+      "mlx/backend/metal/allocator.cpp",
+      "mlx/backend/metal/binary.cpp",
+      "mlx/backend/metal/compiled.cpp",
+      "mlx/backend/metal/conv.cpp",
+      "mlx/backend/metal/copy.cpp",
+      "mlx/backend/metal/distributed.cpp",
+      "mlx/backend/metal/device.cpp",
+      "mlx/backend/metal/event.cpp",
+      "mlx/backend/metal/fft.cpp",
+      "mlx/backend/metal/hadamard.cpp",
+      "mlx/backend/metal/indexing.cpp",
+      "mlx/backend/metal/matmul.cpp",
+      "mlx/backend/metal/scaled_dot_product_attention.cpp",
+      "mlx/backend/metal/metal.cpp",
+      "mlx/backend/metal/primitives.cpp",
+      "mlx/backend/metal/quantized.cpp",
+      "mlx/backend/metal/normalization.cpp",
+      "mlx/backend/metal/rope.cpp",
+      "mlx/backend/metal/scan.cpp",
+      "mlx/backend/metal/slicing.cpp",
+      "mlx/backend/metal/softmax.cpp",
+      "mlx/backend/metal/sort.cpp",
+      "mlx/backend/metal/reduce.cpp",
+      "mlx/backend/metal/ternary.cpp",
+      "mlx/backend/metal/unary.cpp",
+      "mlx/backend/metal/resident.cpp",
+      "mlx/backend/metal/utils.cpp",
+      "mlx/distributed/no_distributed.cpp",
+      "mlx/io/no_gguf.cpp",
+      "mlx/io/no_safetensors.cpp",
+  ] + glob(["mlx/*.cpp"]),
+  hdrs = glob(["mlx/**/*.h"]),
+  includes = [
+      ".",
+      "@metal_cpp",
+  ],
+  # TODO: need to add `metal_cpp/Metal` to includes
+  deps = [
+      "@fmt",
+      "@metal_cpp",
+  ],
+  copts = [
+      "-framework Metal",
+      "-framework Foundation",
+      "-framework QuartzCore"
+  ],
+)
+
+apple_metal_library(
+  name = "metallib",
+  srcs = glob(["src/mlx/**/*.metal"]),
+  out = "mlx.metallib",
+  copts = ["-I."],
+  hdrs = glob(["src/mlx/**/*.h"]),
+)
