@@ -70,6 +70,9 @@ use_repo(cpu, "libpjrt_cpu_darwin_arm64", "libpjrt_cpu_linux_amd64")
 cuda = use_extension("//runtimes/cuda:cuda.bzl", "cuda_packages")
 use_repo(cuda, "libpjrt_cuda")
 
+mlx = use_extension("//mlx:mlx.bzl", "mlx_packages")
+use_repo(mlx, "libmlx")
+
 rocm = use_extension("//runtimes/rocm:rocm.bzl", "rocm_packages")
 use_repo(rocm, "libpjrt_rocm")
 
@@ -100,8 +103,6 @@ use_repo(llvm, "llvm-project")
 bazel_dep(name = "stablehlo", version = "20241021.0-1c0b606")
 bazel_dep(name = "xla", version = "20241025.0-4663f04")
 
-bazel_dep(name = "mlx", version = "20241130.0-bb303c4")
-
 tsl = use_extension("@xla//:tsl.bzl", "tsl")
 use_repo(tsl, "tsl")
 
@@ -117,3 +118,9 @@ apt.install(
     manifest = "//runtimes/neuron:packages.yaml",
 )
 use_repo(apt, "neuron_bookworm")
+
+# TODO(@cryptodeal): remove
+bazel_dep(name = "googletest", version = "1.15.2")
+bazel_dep(name = "abseil-cpp", version = "20240116.0")
+
+

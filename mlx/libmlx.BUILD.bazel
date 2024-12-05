@@ -1,0 +1,49 @@
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
+load("@bazel_skylib//rules:copy_directory.bzl", "copy_directory")
+
+
+copy_file(
+    name = "libmlx_dylib",
+    src = "mlx/lib/libmlx.dylib",
+    out = "libmlx.dylib",
+    allow_symlink = True,
+)
+
+copy_file(
+    name = "mlx_metallib",
+    src = "mlx/lib/mlx.metallib",
+    out = "mlx.metallib",
+    allow_symlink = True,
+)
+
+copy_directory(
+    name = "foundation_include",
+    src = "mlx/include/metal_cpp/Foundation",
+    out = "Foundation",
+)
+
+copy_directory(
+    name = "metal_include",
+    src = "mlx/include/metal_cpp/Metal",
+    out = "Metal",
+)
+
+copy_directory(
+    name = "quartzcore_include",
+    src = "mlx/include/metal_cpp/QuartzCore",
+    out = "QuartzCore",
+)
+
+cc_import(
+    name = "mlx_import",
+    shared_library = ":libmlx_dylib",
+)
+
+cc_library(
+    name = "libmlx",
+    deps = [":mlx_import"],
+    hdrs = glob(["mlx/include/mlx/*.h"]),
+    includes = [":metal_include", ":foundation_include", ":quartzcore_include"],
+    data = [":mlx_metallib"],
+    visibility = ["//visibility:public"],
+)

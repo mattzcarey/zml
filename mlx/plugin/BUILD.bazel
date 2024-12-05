@@ -1,0 +1,169 @@
+load("@xla//xla:xla.bzl", "xla_cc_binary", "xla_cc_test")
+
+package(
+    # copybara:uncomment default_applicable_licenses = ["//tensorflow:license"],
+    default_visibility = ["//visibility:public"],
+    licenses = ["notice"],
+)
+
+cc_library(
+    name = "buffer",
+    srcs = ["buffer.cc"],
+    hdrs = ["buffer.h"],
+    deps = [
+        ":logging",
+        "@xla//xla:literal",
+        "@xla//xla:shape_util",
+        "@xla//xla:util",
+        "@xla//xla/hlo/translate/hlo_to_mhlo:hlo_utils",
+        "@xla//xla/hlo/translate/mhlo_to_hlo:literal_exporter",
+        "@xla//xla/hlo/translate/mhlo_to_hlo:type_to_shape",
+        "@xla//xla/pjrt:pjrt_client",
+        "@xla//xla/pjrt:pjrt_compiler",
+        "@xla//xla/pjrt:pjrt_future",
+        "@abseil-cpp//absl/functional:any_invocable",
+        "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/status:statusor",
+        "@llvm-project//llvm:Support",
+        "@llvm-project//mlir:AsmParser",
+        "@llvm-project//mlir:IR",
+        "@llvm-project//mlir:Support",
+    ],
+)
+
+cc_library(
+    name = "executable",
+    srcs = ["executable.cc"],
+    hdrs = ["executable.h"],
+    deps = [
+        ":buffer",
+        ":logging",
+        "@xla//xla/hlo/builder:xla_computation",
+        "@xla//xla/hlo/translate:stablehlo",
+        "@xla//xla/mlir/utils:error_util",
+        "@xla//xla/mlir_hlo:mhlo_passes",
+        "@xla//xla/mlir_hlo:stablehlo_extension_passes",
+        "@xla//xla/pjrt:mlir_to_hlo",
+        "@xla//xla/pjrt:pjrt_client",
+        "@xla//xla/pjrt:pjrt_executable",
+        "@xla//xla/pjrt:pjrt_future",
+        "@xla//xla/service:computation_placer_hdr",
+        "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:statusor",
+        "@llvm-project//llvm:Support",
+        "@llvm-project//mlir:AsmParser",
+        "@llvm-project//mlir:BytecodeWriter",
+        "@llvm-project//mlir:DataLayoutInterfaces",
+        "@llvm-project//mlir:FuncDialect",
+        "@llvm-project//mlir:IR",
+        "@llvm-project//mlir:Parser",
+        "@llvm-project//mlir:Pass",
+        "@llvm-project//mlir:Support",
+        "@llvm-project//mlir:Transforms",
+        "@stablehlo//:reference_api",
+        "@stablehlo//:stablehlo_passes",
+        "@tsl//tsl/platform:statusor",
+    ],
+)
+
+cc_library(
+    name = "device",
+    srcs = ["device.cc"],
+    hdrs = ["device.h"],
+    deps = [
+        ":logging",
+        "@xla//xla:util",
+        "@xla//xla/pjrt:pjrt_client",
+        "@xla//xla/pjrt:pjrt_common",
+        "@xla//xla/pjrt:pjrt_compiler",
+        "@xla//xla/pjrt:pjrt_device_description",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings:str_format",
+        "@abseil-cpp//absl/strings:string_view",
+        "@abseil-cpp//absl/types:span",
+    ],
+)
+
+cc_library(
+    name = "client_cpp_pjrt",
+    srcs = [
+        "client_cpp_pjrt.cc",
+    ],
+    hdrs = [
+        "client_cpp_pjrt.h",
+    ],
+    deps = [
+        ":buffer",
+        ":device",
+        ":executable",
+        ":logging",
+        "@xla//xla:literal",
+        "@xla//xla:shape_util",
+        "@xla//xla:util",
+        "@xla//xla/pjrt:host_memory_spaces",
+        "@xla//xla/pjrt:pjrt_client",
+        "@xla//xla/pjrt:pjrt_common",
+        "@xla//xla/pjrt:pjrt_compiler",
+        "@xla//xla/tsl/framework:allocator",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings:str_format",
+        "@abseil-cpp//absl/strings:string_view",
+        "@abseil-cpp//absl/types:span",
+        "@tsl//tsl/platform:fingerprint",
+    ],
+)
+
+cc_library(
+    name = "client_c_pjrt",
+    srcs = [
+        "client_c_pjrt.cc",
+    ],
+    hdrs = ["client_c_pjrt.h"],
+    deps = [
+        ":client_cpp_pjrt",
+        "@xla//xla/pjrt:pjrt_client",
+        "@xla//xla/pjrt/c:pjrt_c_api_hdrs",
+        "@xla//xla/pjrt/c:pjrt_c_api_layouts_extension_hdrs",
+        "@xla//xla/pjrt/c:pjrt_c_api_wrapper_impl",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/strings:string_view",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "logging",
+    srcs = ["logging.cc"],
+    hdrs = ["logging.h"],
+    deps = [
+        "@abseil-cpp//absl/base:log_severity",
+        "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/log:globals",
+        "@llvm-project//llvm:Support",
+        "@llvm-project//mlir:AsmParser",
+        "@llvm-project//mlir:DataLayoutInterfaces",
+        "@llvm-project//mlir:IR",
+    ],
+)
+
+xla_cc_test(
+    name = "plugin_pjrt_test",
+    srcs = ["plugin_pjrt_test.cc"],
+    deps = [
+        ":client_c_pjrt",
+        ":client_cpp_pjrt",
+        "@xla//xla/pjrt:pjrt_client_test_common",
+        "@xla//xla/pjrt/c:pjrt_c_api_test_common",
+        "@xla//xla/pjrt/c:pjrt_c_api_wrapper_impl",
+        "@googletest//:gtest_main",
+    ],
+)
+
+xla_cc_binary(
+    name = "stablehlo_reference_plugin.so",
+    linkshared = True,
+    deps = [
+        ":client_c_pjrt",
+    ],
+)
