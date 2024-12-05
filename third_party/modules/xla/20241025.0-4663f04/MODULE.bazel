@@ -25,7 +25,6 @@ use_repo(tsl, "tsl")
 xla_workspace = use_extension("//:workspace.bzl", "xla_workspace")
 use_repo(
     xla_workspace,
-    "llvm-project",
     "com_github_grpc_grpc",
     "com_google_protobuf",
     "local_config_cuda",
